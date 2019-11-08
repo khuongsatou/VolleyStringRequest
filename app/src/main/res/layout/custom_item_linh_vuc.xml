@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="2dp"
+    android:layout_marginLeft="2dp"
+    android:layout_marginRight="2dp"
+    android:id="@+id/cvItemLinhVuc"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:weightSum="2"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <TextView
+            android:textSize="20sp"
+            android:layout_weight="1"
+            android:id="@+id/tvTenLinhVuc"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:text="Toán" />
+
+        <LinearLayout
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content">
+            <Button
+                android:layout_weight="1"
+                android:id="@+id/btnThem"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Them" />
+
+            <Button
+                android:layout_weight="1"
+                android:id="@+id/btnXoa"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Xoa" />
+        </LinearLayout>
+    </LinearLayout>
+
+
+
+</androidx.cardview.widget.CardView>
