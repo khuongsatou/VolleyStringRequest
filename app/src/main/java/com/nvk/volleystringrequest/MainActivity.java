@@ -1,6 +1,7 @@
 package com.nvk.volleystringrequest;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -8,6 +9,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -38,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
     private static final String KEY_LIMIT = "limit";
     //private static final String BASE = "http://localhost:8000/public/api/linh_vuc";
     private static final String BASE = "http://192.168.1.32:8000/public/api/linh_vuc/phan_trang";
-    //private static final String BASE = "http://192.168.1.32:81/web/phan_trang.php";
 
     private RecyclerView rcvLinhVuc;
     private LinhVucAdapter adapter;
@@ -56,8 +61,11 @@ public class MainActivity extends AppCompatActivity {
         createAdapter();
         loadData(null);
         checkScroll();
-
     }
+
+
+
+
 
     private void checkScroll() {
         rcvLinhVuc.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -95,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void loadData(Bundle data) {
+    public void loadData(Bundle data) {
         boolean result = Utilitis.checkNetWork(this, data);
         if (result) {
             startVolley(data, BASE);
@@ -179,5 +187,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void radiation() {
         rcvLinhVuc = findViewById(R.id.rcvLinhVuc);
+
     }
 }

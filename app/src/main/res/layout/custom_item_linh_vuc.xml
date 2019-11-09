@@ -32,14 +32,14 @@
                 android:id="@+id/btnThem"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="Them" />
+                android:text="Thêm" />
 
             <Button
                 android:layout_weight="1"
                 android:id="@+id/btnXoa"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="Xoa" />
+                android:text="Xóa" />
         </LinearLayout>
     </LinearLayout>
 
