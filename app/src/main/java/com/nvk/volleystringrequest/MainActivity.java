@@ -33,19 +33,20 @@ import java.util.Map;
 
 
 public class MainActivity extends AppCompatActivity {
-    private static final int PAGE_SIZE = 25;
+    private static final int PAGE_SIZE = 20;
     private static final String KEY_PAGE = "page";
     private static final String KEY_LIMIT = "limit";
     //private static final String BASE = "http://localhost:8000/public/api/linh_vuc";
-    //private static final String BASE = "http://192.168.1.32:8000/public/api/linh_vuc/phan_trang/";
-    private static final String BASE = "http://192.168.1.32:81/web/phan_trang.php";
+    private static final String BASE = "http://192.168.1.32:8000/public/api/linh_vuc/phan_trang";
+    //private static final String BASE = "http://192.168.1.32:81/web/phan_trang.php";
 
     private RecyclerView rcvLinhVuc;
     private LinhVucAdapter adapter;
     private List<LinhVuc> linhVucs = new ArrayList<>();
-    private int currentPage = 1;
-    private boolean checkLoading = false;
-    private boolean checkLastPage = false;
+    public int currentPage = 1;
+    private boolean checkLoading =false;
+    private boolean checkLastPage=false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,11 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
         radiation();
         createAdapter();
-        try {
-            loadData(null);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
+        loadData(null);
         checkScroll();
 
     }
@@ -73,27 +70,23 @@ public class MainActivity extends AppCompatActivity {
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
-                if (!checkLoading && !checkLastPage){
+
                     LinearLayoutManager layoutManager = (LinearLayoutManager) rcvLinhVuc.getLayoutManager();
                     int countItem = layoutManager.getItemCount();
                     int countChild = layoutManager.getChildCount();
                     int findChildNext = layoutManager.findFirstVisibleItemPosition();
-                    if ((countChild+findChildNext) >= countItem && countItem > 0 && countItem >= PAGE_SIZE){
-                        checkLoading= true;
+                if (!checkLoading && !checkLastPage) {
+                    if ((countChild + findChildNext) >= countItem && findChildNext >= 0 && countItem >= PAGE_SIZE) {
+                        checkLoading = true;
                         currentPage++;
-
                         linhVucs.add(null);
-                        adapter.notifyItemInserted(linhVucs.size()-1);
+                        adapter.notifyItemInserted(linhVucs.size() - 1);
 
                         Bundle data = new Bundle();
-                        data.putInt(KEY_PAGE,currentPage);
-                        data.putInt(KEY_LIMIT,PAGE_SIZE);
+                        data.putInt(KEY_PAGE, currentPage);
+                        data.putInt(KEY_LIMIT, PAGE_SIZE);
 
-                        try {
-                            loadData(data);
-                        } catch (MalformedURLException e) {e.printStackTrace();
-
-                        }
+                        loadData(data);
                     }
                 }
 
@@ -102,48 +95,83 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void loadData(Bundle data) throws MalformedURLException {
-         boolean result = Utilitis.checkNetWork(this,data);
-         if (result){
-             startVolley(data,BASE);
-         }else{
-             Utilitis.ShowDialogNotification("Vui Lòng Kiểm tra INTERNET",this).show();
-         }
+    private void loadData(Bundle data) {
+        boolean result = Utilitis.checkNetWork(this, data);
+        if (result) {
+            startVolley(data, BASE);
+        } else {
+            Utilitis.ShowDialogNotification("Vui Lòng Kiểm tra INTERNET", this).show();
+        }
     }
 
-    private void startVolley(final Bundle data,String url) throws MalformedURLException {
-
+    private void startVolley(final Bundle data, String url) {
+        final int[] page ={1};
+        final int[] limit ={20};
+        if (data != null){
+            page[0] = data.getInt(KEY_PAGE);
+            limit[0] = data.getInt(KEY_LIMIT);
+        }
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                Log.d("AAAAA",response);
+                Log.d("AAAAA", response);
+                try {
+                    JSONObject objLinhVuc = new JSONObject(response);
+                    int total = objLinhVuc.getInt("total");
+                    int totalPage = total / PAGE_SIZE;
+                    if (totalPage % PAGE_SIZE != 0){
+                        totalPage++;
+                    }
+
+                    if (linhVucs.size() >0){
+                        linhVucs.remove(linhVucs.size()-1);
+                        adapter.notifyItemRemoved(linhVucs.size());
+                    }
+                    JSONArray arrDanhSach = objLinhVuc.getJSONArray("danh_sach");
+                    for (int i = 0; i < arrDanhSach.length(); i++) {
+                        JSONObject objItemLinhVuc = arrDanhSach.getJSONObject(i);
+                        int id = objItemLinhVuc.getInt("id");
+                        String tenLinhVuc = objItemLinhVuc.getString("ten_linh_vuc");
+                        LinhVuc linhVuc = new LinhVuc();
+                        linhVuc.setId(id);
+                        linhVuc.setTenLinhVuc(tenLinhVuc);
+                        linhVucs.add(linhVuc);
+                        Log.d("AAAA",tenLinhVuc);
+                    }
+                    checkFinish(totalPage);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                adapter.notifyDataSetChanged();
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d("AAAAA",error.toString());
+                Log.d("AAAAA", error.toString());
             }
-        }){
-
-
+        }) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String,String> params = new HashMap<>();
-                params.put("page",String.valueOf(2));
-                params.put("limit",String.valueOf(2));
-                Log.d("AAAA",params.toString());
+                Map<String, String> params = new HashMap<>();
+                params.put(KEY_PAGE, String.valueOf(page[0]));
+                params.put(KEY_LIMIT, String.valueOf(limit[0]));
+                Log.d("AAAA", params.toString());
                 return params;
-             }
-
-
+            }
         };
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
         requestQueue.add(stringRequest);
     }
 
+    private void checkFinish(int totalPage) {
+        checkLoading = false;
+        checkLastPage= (currentPage == totalPage);
+    }
+
     private void createAdapter() {
-        adapter = new LinhVucAdapter(this,linhVucs);
+        adapter = new LinhVucAdapter(this, linhVucs);
         rcvLinhVuc.setLayoutManager(new LinearLayoutManager(this));
         rcvLinhVuc.setAdapter(adapter);
 
